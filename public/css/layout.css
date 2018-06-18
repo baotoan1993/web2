@@ -29,19 +29,19 @@
 	text-decoration: none;
 }
 
-.ds-sanpham div.product-item{
+.ds-sanpham div.col-sm-2{
 	background: rgb(255, 255, 255);
 	transition: background 0.5s;
 	border-radius: 5%;
 }
 
-.ds-sanpham div.product-item:hover {
+.ds-sanpham div.col-sm-2:hover {
 	background: rgb(255, 230, 162);
 	cursor: pointer;
 	/* filter:blur(1px); */
 }
 
-.ds-sanpham .product-item{
+.ds-sanpham .col-sm-2{
 	margin-bottom: 10px;
 }
 

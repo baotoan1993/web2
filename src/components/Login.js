@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux'
+import { Redirect } from 'react-router-dom'
 
 import axios from 'axios'
 
@@ -8,10 +10,12 @@ class Login extends Component {
 		super(props);
 		this.state = {
 			username: '',
-			password: ''
+			password: '',
+			isLogged: false
 		}
 	}
 	
+
 	handleChange = (event) => {
 		let name = event.target.name
 		let value = event.target.value
@@ -22,16 +26,29 @@ class Login extends Component {
 
 	handleSubmit = (event) => {
 		event.preventDefault()
-		axios.post('/login', {
+		axios.post('http://localhost:4000/login', {
 			username: this.state.username,
 			password: this.state.password
 		})
 		.then(res => {
-			console.log(res)
+			console.log(res.data)
+			localStorage.setItem('user', JSON.stringify(res.data.user))
+			
+			setTimeout(()=> {
+				this.setState({
+					isLogged: true
+				})
+				this.props.dispatch({type: 'LOGIN', data: res.data.user})
+			}, 1000)
 		})
 	}
 
 	render() {
+		if(this.state.isLogged){
+			return(
+				<Redirect to="products" />
+			)
+		}
 		return (
 			<div className="container-fluid">
 				<form className="form-horizontal" role="form" onSubmit={this.handleSubmit}>
@@ -98,4 +115,4 @@ class Login extends Component {
 	}
 }
 
-export default Login;
+export default connect()(Login);

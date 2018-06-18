@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import {NavLink} from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
+import { connect } from 'react-redux'
 
 class Navigation extends Component {
 
@@ -9,24 +10,37 @@ class Navigation extends Component {
 			isLogged: false
 		}
 	}
+
+	handleLogout = (event) => {
+		event.preventDefault()
+		localStorage.removeItem('user')
+		this.props.dispatch({type: 'LOGOUT'})
 	
+	}
 
 	render() {
-		var menu = this.state.isLogged ? (
-		<ul className="nav justify-content-center">
+		var canProduct = this.props.state == null ?
+			''
+		:
+		<li className="nav-item">
+			<NavLink className="nav-link" to="/products" activeClassName="active">
+				<i className="fa fa-user-circle" aria-hidden="true" />&nbsp;Sản Phẩm
+			</NavLink>
+		</li>
+
+		var canLogin = this.props.state == null ?
 			<li className="nav-item">
-				<NavLink className="nav-link" to="#">Công nghệ</NavLink>
+				<NavLink className="nav-link" to="/login" activeClassName="active">
+					<i className="fa fa-user-circle" aria-hidden="true" />&nbsp;Đăng Nhập
+				</NavLink>
 			</li>
+			:
 			<li className="nav-item">
-				<NavLink className="nav-link" to="#">Mỹ phẩm</NavLink>
+				<NavLink className="nav-link" to="/logout" onClick={this.handleLogout} activeClassName="active">
+					<i className="fa fa-user-circle" aria-hidden="true" />&nbsp;{this.props.state.fullname}(Đăng xuât)
+				</NavLink>
 			</li>
-			<li className="nav-item">
-				<NavLink className="nav-link" to="#">Thời trang</NavLink>
-			</li>
-			<li className="nav-item">
-				<NavLink className="nav-link" to="#">Nổi bật</NavLink>
-			</li>
-		</ul>) : ''
+
 		return (
 			<header>
 				<div className="container-fluid" id="header">
@@ -47,26 +61,22 @@ class Navigation extends Component {
 										<i className="fa fa-home" aria-hidden="true" />&nbsp;Trang Chủ
 									</NavLink>
 								</li>
-								<li className="nav-item">
-									<NavLink className="nav-link" to="/login">
-										<i className="fa fa-user-circle" aria-hidden="true" />&nbsp;Đăng Nhập
-									</NavLink>
-								</li>
-								<li className="nav-item">
-									<NavLink className="nav-link" to="/register">
-										<i className="fa fa-user-plus" aria-hidden="true" />&nbsp;Đăng Ký
-									</NavLink>
-								</li>
+
+								{ canProduct }
+
+								{ canLogin }
 							</ul>
 						</div>
 					</nav>
 				</div>
-				
-				{menu}
 
 			</header>
 		);
 	}
 }
 
-export default Navigation;
+function mapStateToProps(state) {
+	return { state: state }
+}
+
+export default connect(mapStateToProps)(Navigation);
