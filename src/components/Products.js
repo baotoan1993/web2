@@ -114,7 +114,7 @@ class Products extends Component {
 											key={idx}
 											itemId={item.id}
 											currentTimer={item.current_timer}
-											currentPrice={item.product_price}
+											currentPrice={item.auction_price}
 											image={item.image} 
 											/>
 									})

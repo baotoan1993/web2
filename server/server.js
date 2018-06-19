@@ -28,47 +28,26 @@ var list_products = []
 var interval
 app.listen(4000, () => {
 	console.log('started port 4000')
-	// sequelize.query("select * from products",
-	// 	{
-	// 		type: sequelize.QueryTypes.SELECT
-	// 	})
-	// 	.then(val => {
-	// 		// console.log(val)
-	// 		list_products = val
-	// 		interval = setInterval(function () {
-	// 			list_products.forEach((x, idx) => {
-	// 				if (x.current_timer > 0) {
-	// 					list_products[idx].current_timer--
-	// 				} else {
-	// 					list_products[idx].current_timer = x.timer
-	// 				}
-	// 			})
-	// 			// console.log(list_products[0].current_timer)
-	// 		}, 1000)
-	// 	})
-})
-var auction_id = 1
-app.get('/start', (req, res) => {
-	sequelize.query("select * from products", {
-		type: sequelize.QueryTypes.SELECT
-	})
+	sequelize.query("select * from products",
+		{
+			type: sequelize.QueryTypes.SELECT
+		})
 		.then(val => {
+			// console.log(val)
 			list_products = val
-			list_products.forEach(x => {
-				sequelize.query("insert into auction (auction_id, product_id) values(?,?)", {
-					type: sequelize.QueryTypes.INSERT,
-					replacements: [auction_id, x.id]
-				})
-			})
 			interval = setInterval(function () {
 				list_products.forEach((x, idx) => {
 					if (x.current_timer > 0) {
 						list_products[idx].current_timer--
+					} else {
+						list_products[idx].current_timer = x.timer
 					}
 				})
+				// console.log(list_products[0].current_timer)
 			}, 1000)
 		})
 })
+
 
 app.post('/login', (req, res) => {
 	var username = req.body.username
@@ -119,19 +98,42 @@ app.post('/auction', (req, res) => {
 	let product_id = req.body.product_id
 	let user_id = req.body.user_id
 	let price = req.body.price
-	sequelize.query(`select * from auctioning 
-						where auction_id = ? and 
-						product_id = ? and
-						user_id = ?`, {
-			type: sequelize.QueryTypes.SELECT,
-			replacements: [auction_id, product_id, user_id]
-		})
-		.then(val => {
-			if(!val){
-				sequelize.query("insert into auctioning values(?,?,?,?)",{
-					type: sequelize.QueryTypes.INSERT,
-					replacements: [auction_id, product_id, user_id, price]
-				})
-			}
+	sequelize.query(`update products
+					 set auction_price = ?
+					 where id = ?`, {
+			type: sequelize.QueryTypes.UPDATE,
+			replacements: [price, product_id]
+		}).then(() => {
+			sequelize.query("select * from auctioning where product_id = ? and user_id = ?", {
+				type: sequelize.QueryTypes.SELECT,
+				replacements: [product_id, user_id]
+			}).then((x) => {
+				if (x.length == 0) {
+					sequelize.query("insert into auctioning values(?,?,?)", {
+						type: sequelize.QueryTypes.SELECT,
+						replacements: [product_id, user_id, price]
+					})
+						.then(() => {
+							sequelize.query("select * from products", {
+								type: sequelize.QueryTypes.SELECT,
+							}).then((val) => {
+								list_products = val
+							})
+						})
+				} else {
+					sequelize.query("update auctioning set price = ? where product_id = ? and user_id = ?", {
+						type: sequelize.QueryTypes.SELECT,
+						replacements: [price, product_id, user_id]
+					})
+						.then(() => {
+							sequelize.query("select * from products", {
+								type: sequelize.QueryTypes.SELECT,
+							}).then((val) => {
+								list_products = val
+							})
+						})
+				}
+			})
+
 		})
 })

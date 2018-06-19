@@ -8,9 +8,8 @@ class Product_Detail extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			product: {},
 			isOut: null,
-			auction_price: 0
+			auction_price_detail: 0
 		}
 	}
 
@@ -23,7 +22,7 @@ class Product_Detail extends Component {
 			})
 				.then(val => {
 					this.setState({
-						...val.data
+						...val.data,
 					})
 				})
 		}, 1000)
@@ -46,15 +45,15 @@ class Product_Detail extends Component {
 
 	handleInputValue = (e) => {
 		this.setState({
-			auction_price: e.target.value
+			auction_price_detail: e.target.value
 		})
 	}
 
 	handleAuction = (e) => {
 		var user = JSON.parse(localStorage.getItem('user'))
-		var pr = this.state.auction_price == 0 ? this.state.product_price : this.state.auction_price
+		var pr = this.state.auction_price_detail < this.state.auction_price ? this.state.auction_price : this.state.auction_price_detail
 		var product_id = this.state.id
-		// console.log(user, pr, product_id)
+		console.log(user, pr, product_id)
 		axios({
 			url: 'http://localhost:4000/auction',
 			method: 'post',
@@ -64,26 +63,27 @@ class Product_Detail extends Component {
 				price: pr
 			}
 		})
-			.then(val => {
+			.then(() => {
 				clearInterval(this.state.isOut)
-				let id = this.props.match.params.item
-				let x = setInterval(() => {
-					axios.get('http://localhost:4000/product-item/' + id, {
-						method: 'get'
-					})
-						.then(val => {
-							this.setState({
-								...val.data
-							})
-						})
-				}, 1000)
-
-				this.setState({
-					isOut: x
-				})
+				setInterval(this.state.isOut)
 			})
 	}
 
+	handleClickIncrease = () => {
+		let val = parseInt(this.refs.the_price.value) + 1
+		this.refs.the_price.value = val
+	}
+
+	handleClickDecrese = () => {
+		let val = parseInt(this.refs.the_price.value) - 1
+		if(val > this.state.auction_price){
+			this.refs.the_price.value = val
+		}
+	}
+
+	componentWillUnmount(){
+		clearInterval(this.state.isOut)
+	}
 
 	render() {
 		return (
@@ -109,18 +109,27 @@ class Product_Detail extends Component {
 							</div>
 							<div className="col-sm-5">
 								<h6>Giá đấu thầu hiện tại</h6>
-								<h3>{this.state.product_price}k</h3>
+								<h3>{this.state.auction_price}k</h3>
 								<div className="row" style={{ marginBottom: 10 }}>
 									<div className="col-lg-offset-3 col-lg-6">
 										<div className="input-group">
 											<span className="input-group-btn">
-												<button className="btn btn-danger" type="button" style={{ borderRadius: 0 }} id="btnGiam">-</button>
+												<button className="btn btn-danger" 
+														type="button" 
+														style={{ borderRadius: 0 }} 
+														id="btnGiam"
+														onClick={this.handleClickDecrese}>-</button>
 											</span>
 											<input type="text" className="form-control" style={{ textAlign: 'center' }}
-												defaultValue={this.state.product_price} id="numGiaNhap"
-												onKeyUp={this.handleInputValue} />
+												defaultValue={this.state.auction_price} id="numGiaNhap"
+												onKeyUp={this.handleInputValue} 
+												ref="the_price"/>
 											<span className="input-group-btn">
-												<button className="btn btn-warning" type="button" style={{ borderRadius: 0 }} id="btnTang">+</button>
+												<button className="btn btn-warning" 
+														type="button" 
+														style={{ borderRadius: 0 }} 
+														id="btnTang"
+														onClick={this.handleClickIncrease}>+</button>
 											</span>
 										</div>
 									</div>
