@@ -1,10 +1,17 @@
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom'
 
 class Product_Item extends Component {
+
+	// handleSelectedItem = (e) => {
+	// 	e.preventDefault()
+	// 	console.log(this.props.itemId)
+	// }
+
 	render() {
 		return (
 			<div className="col-sm-2">
-				<a href="/" className="thumb">
+				<Link to={"/product-item/" + this.props.itemId} className="thumb">
 					<div className="article">
 						<img className="img-fluid" src={"images/" + this.props.image} />
 					</div>
@@ -16,7 +23,7 @@ class Product_Item extends Component {
 							<p>{this.props.currentPrice}K</p>
 						</div>
 					</div>
-				</a>
+				</Link>
 			</div>
 		);
 	}

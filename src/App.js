@@ -8,6 +8,7 @@ import Navigation from './components/Navigation';
 import Home from './components/Home';
 import Login from './components/Login';
 import Products from './components/Products';
+import Product_Detail from './components/Product_Detail';
 
 var initialState = JSON.parse(localStorage.getItem('user'))
 var store = createStore((state = initialState, action) => {
@@ -34,6 +35,7 @@ class App extends Component {
 						<Route exact path='/' component={Home} />
 						<Route path='/login' component={Login} />
 						<Route path='/products' component={Products}/>
+						<Route path='/product-item/:item' component={Product_Detail} />
 					</div>
 				</Provider>
 			</Router>

@@ -13,9 +13,12 @@ class Navigation extends Component {
 
 	handleLogout = (event) => {
 		event.preventDefault()
+		alert('Đăng xuất thành công!')
 		localStorage.removeItem('user')
 		this.props.dispatch({type: 'LOGOUT'})
-	
+		setTimeout(() => {
+			window.location.href = '/'
+		}, 300)
 	}
 
 	render() {
@@ -47,7 +50,7 @@ class Navigation extends Component {
 					<nav className="navbar navbar-expand-md navbar-light" style={{ background: '#F0F8FF' }}>
 						{/* Brand */}
 						<NavLink className="navbar-brand" exact to="/" style={{ textAlign: 'center' }}>
-							<img src="images/Logo.png" alt="logo.png" style={{ width: '50%' }} />
+							<img src="/images/Logo.png" alt="logo.png" style={{ width: '50%' }} />
 						</NavLink>
 						{/* Toggler/collapsibe Button */}
 						<button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">

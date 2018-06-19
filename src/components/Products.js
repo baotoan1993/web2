@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux'
-import { NavLink } from 'react-router-dom'
+import { NavLink, Redirect } from 'react-router-dom'
 
 
 import Product_Item from './Product_Item';
@@ -84,6 +84,8 @@ class Products extends Component {
 	}
 
 	render() {
+		if(this.props.state == null)
+			return <Redirect to="/login" />
 		return (
 			<div>
 				<ul className="nav justify-content-center">
@@ -95,9 +97,6 @@ class Products extends Component {
 					</li>
 					<li className="nav-item">
 						<NavLink className="nav-link" to="#" onClick={this.handleChangeFash}>Thời trang</NavLink>
-					</li>
-					<li className="nav-item">
-						<NavLink className="nav-link" to="#">Nổi bật</NavLink>
 					</li>
 				</ul>
 				<div className="container-fluid">
@@ -113,9 +112,11 @@ class Products extends Component {
 									this.state.products.map((item, idx) => {
 										return <Product_Item
 											key={idx}
+											itemId={item.id}
 											currentTimer={item.current_timer}
 											currentPrice={item.product_price}
-											image={item.image} />
+											image={item.image} 
+											/>
 									})
 								}
 							</div>
@@ -127,4 +128,8 @@ class Products extends Component {
 	}
 }
 
-export default Products;
+function mapStateToProps(state){
+	return {state: state}
+}
+
+export default connect(mapStateToProps)(Products);

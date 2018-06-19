@@ -33,12 +33,12 @@ class Login extends Component {
 		.then(res => {
 			console.log(res.data)
 			localStorage.setItem('user', JSON.stringify(res.data.user))
-			
+			this.props.dispatch({type: 'LOGIN', data: res.data.user})
 			setTimeout(()=> {
 				this.setState({
 					isLogged: true
 				})
-				this.props.dispatch({type: 'LOGIN', data: res.data.user})
+				
 			}, 1000)
 		})
 	}
