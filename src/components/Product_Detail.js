@@ -9,7 +9,7 @@ class Product_Detail extends Component {
 		super(props);
 		this.state = {
 			isOut: null,
-			auction_price_detail: 0
+			isDone: false
 		}
 	}
 
@@ -21,6 +21,12 @@ class Product_Detail extends Component {
 				method: 'get'
 			})
 				.then(val => {
+					if(val.data == '0'){
+						this.setState({
+							isDone: true
+						})
+						clearInterval(this.state.isOut)
+					}
 					this.setState({
 						...val.data,
 					})
@@ -49,24 +55,30 @@ class Product_Detail extends Component {
 		})
 	}
 
+	handleLostFocus = (e) => {
+		if(e.target.value <= this.state.auction_price || /[a-zA-Z]/.test(e.target.value)){
+			e.target.value = parseInt( this.state.auction_price) + 1
+		}
+	}
+
 	handleAuction = (e) => {
-		var user = JSON.parse(localStorage.getItem('user'))
-		var pr = this.state.auction_price_detail < this.state.auction_price ? this.state.auction_price : this.state.auction_price_detail
+		var user_id = JSON.parse(localStorage.getItem('user')).id
+		var pr = this.refs.the_price.value <= this.state.auction_price ? parseInt(this.state.auction_price)  + 1 : this.refs.the_price.value
 		var product_id = this.state.id
-		console.log(user, pr, product_id)
+		console.log(user_id, pr, product_id)
 		axios({
 			url: 'http://localhost:4000/auction',
 			method: 'post',
 			data: {
-				user_id: user.id,
+				user_id: user_id,
 				product_id: product_id,
 				price: pr
 			}
 		})
-			.then(() => {
-				clearInterval(this.state.isOut)
-				setInterval(this.state.isOut)
-			})
+			// .then(() => {
+			// 	clearInterval(this.state.isOut)
+			// 	setInterval(this.state.isOut)
+			// })
 	}
 
 	handleClickIncrease = () => {
@@ -105,7 +117,7 @@ class Product_Detail extends Component {
 							<div className="col-sm-3">
 								<span>Thời gian còn</span>
 								<br />
-								<h2 className="text-danger">{this.state.current_timer} (giây)</h2>
+								<h2 className="text-danger">{this.state.isDone? "KẾT THÚC" : this.state.current_timer} (giây)</h2>
 							</div>
 							<div className="col-sm-5">
 								<h6>Giá đấu thầu hiện tại</h6>
@@ -123,6 +135,7 @@ class Product_Detail extends Component {
 											<input type="text" className="form-control" style={{ textAlign: 'center' }}
 												defaultValue={this.state.auction_price} id="numGiaNhap"
 												onKeyUp={this.handleInputValue} 
+												onBlur={this.handleLostFocus}
 												ref="the_price"/>
 											<span className="input-group-btn">
 												<button className="btn btn-warning" 

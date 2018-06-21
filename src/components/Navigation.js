@@ -15,25 +15,34 @@ class Navigation extends Component {
 		event.preventDefault()
 		alert('Đăng xuất thành công!')
 		localStorage.removeItem('user')
-		this.props.dispatch({type: 'LOGOUT'})
+		this.props.dispatch({ type: 'LOGOUT' })
 		setTimeout(() => {
 			window.location.href = '/'
 		}, 300)
 	}
 
 	render() {
+		var canCart = this.props.state == null ?
+			null
+			:
+			<li className="nav-item">
+				<NavLink className="nav-link" to="/cart">
+					<i className="fa fa-cart-arrow-down" aria-hidden="true" />&nbsp;Giỏ Hàng
+				</NavLink>
+			</li>
+
 		var canProduct = this.props.state == null ?
-			''
-		:
-		<li className="nav-item">
-			<NavLink className="nav-link" to="/products" activeClassName="active">
-				<i className="fa fa-user-circle" aria-hidden="true" />&nbsp;Sản Phẩm
-			</NavLink>
-		</li>
+			null
+			:
+			<li className="nav-item">
+				<NavLink className="nav-link" to="/products">
+					<i className="fa fa-user-circle" aria-hidden="true" />&nbsp;Sản Phẩm
+				</NavLink>
+			</li>
 
 		var canLogin = this.props.state == null ?
 			<li className="nav-item">
-				<NavLink className="nav-link" to="/login" activeClassName="active">
+				<NavLink className="nav-link" to="/login">
 					<i className="fa fa-user-circle" aria-hidden="true" />&nbsp;Đăng Nhập
 				</NavLink>
 			</li>
@@ -49,7 +58,7 @@ class Navigation extends Component {
 				<div className="container-fluid" id="header">
 					<nav className="navbar navbar-expand-md navbar-light" style={{ background: '#F0F8FF' }}>
 						{/* Brand */}
-						<NavLink className="navbar-brand" exact to="/" style={{ textAlign: 'center' }}>
+						<NavLink className="navbar-brand" to="/" style={{ textAlign: 'center' }}>
 							<img src="/images/Logo.png" alt="logo.png" style={{ width: '50%' }} />
 						</NavLink>
 						{/* Toggler/collapsibe Button */}
@@ -64,10 +73,11 @@ class Navigation extends Component {
 										<i className="fa fa-home" aria-hidden="true" />&nbsp;Trang Chủ
 									</NavLink>
 								</li>
+								{canCart}
 
-								{ canProduct }
+								{canProduct}
 
-								{ canLogin }
+								{canLogin}
 							</ul>
 						</div>
 					</nav>

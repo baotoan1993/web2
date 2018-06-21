@@ -14,13 +14,13 @@ class Login extends Component {
 			isLogged: false
 		}
 	}
-	
+
 
 	handleChange = (event) => {
 		let name = event.target.name
 		let value = event.target.value
 		this.setState({
-			[name] : value
+			[name]: value
 		})
 	}
 
@@ -30,22 +30,27 @@ class Login extends Component {
 			username: this.state.username,
 			password: this.state.password
 		})
-		.then(res => {
-			console.log(res.data)
-			localStorage.setItem('user', JSON.stringify(res.data.user))
-			this.props.dispatch({type: 'LOGIN', data: res.data.user})
-			setTimeout(()=> {
-				this.setState({
-					isLogged: true
-				})
-				
-			}, 1000)
-		})
+			.then(res => {
+				// console.log(res.data)
+				if (res.data.status == 1) {
+					localStorage.setItem('user', JSON.stringify(res.data.user))
+					this.props.dispatch({type: 'LOGIN', data: res.data.user})
+					setTimeout(()=> {
+						this.setState({
+							isLogged: true
+						})
+
+					}, 1000)
+				}else{
+					alert("Tên đăng nhập hoặc mật khẩu không đúng!")
+				}
+
+			})
 	}
 
 	render() {
-		if(this.state.isLogged){
-			return(
+		if (this.state.isLogged) {
+			return (
 				<Redirect to="products" />
 			)
 		}
@@ -68,8 +73,8 @@ class Login extends Component {
 									<div className="input-group-addon" style={{ width: '2.6rem' }}>
 										<i className="fa fa-at" />
 									</div>
-									<input type="text" name="username" className="form-control" 
-										placeholder="your username" required autoFocus 
+									<input type="text" name="username" className="form-control"
+										placeholder="your username" required autoFocus
 										onChange={this.handleChange} />
 								</div>
 							</div>
@@ -84,9 +89,9 @@ class Login extends Component {
 									<div className="input-group-addon" style={{ width: '2.6rem' }}>
 										<i className="fa fa-key" />
 									</div>
-									<input type="password" name="password" className="form-control" 
-										  placeholder="Mật Khẩu" required 
-										  onChange={this.handleChange} />
+									<input type="password" name="password" className="form-control"
+										placeholder="Mật Khẩu" required
+										onChange={this.handleChange} />
 								</div>
 							</div>
 						</div>
