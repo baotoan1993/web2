@@ -1,5 +1,6 @@
 var express = require('express')
 var bodyParser = require('body-parser')
+
 var app = express()
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -24,28 +25,12 @@ app.use((req, res, next) => {
 	next()
 })
 
+
+
 var list_products = []
 var interval
 app.listen(4000, () => {
 	console.log('started port 4000')
-	// sequelize.query("select * from products",
-	// 	{
-	// 		type: sequelize.QueryTypes.SELECT
-	// 	})
-	// 	.then(val => {
-	// 		// console.log(val)
-	// 		list_products = val
-	// 		interval = setInterval(function () {
-	// 			list_products.forEach((x, idx) => {
-	// 				if (x.current_timer > 0) {
-	// 					list_products[idx].current_timer--
-	// 				}
-	// 				// else {
-	// 				// 	list_products[idx].current_timer = x.timer
-	// 				// }
-	// 			})
-	// 		}, 1000)
-	// 	})
 })
 
 app.get("/start", (req, res) => {
@@ -90,8 +75,17 @@ app.get("/start", (req, res) => {
 													}).then(() => {
 														list_products.splice(idx, 1)
 													})
+												}).then(() => {
+													sequelize.query(`update products set status = ? where id =?`, {
+														type: sequelize.QueryTypes.UPDATE,
+														replacements: [false, x.id]
+													})
 												})
 										} else {
+											sequelize.query(`update products set status = ? where id =?`, {
+												type: sequelize.QueryTypes.UPDATE,
+												replacements: [false, x.id]
+											})
 											list_products.splice(idx, 1)
 										}
 									})
@@ -120,6 +114,30 @@ app.post('/login', (req, res) => {
 				})
 			}
 		})
+})
+
+app.post('/register', (req, res) => {
+	let username = req.body.username
+	let password = req.body.password
+	let fullname = req.body.fullname
+
+	sequelize.query("select * from account where username = ?", {
+		type: sequelize.QueryTypes.SELECT,
+		replacements: [username]
+	}).then(val => {
+		if(val.length > 0){
+			res.send("0")
+			res.end()
+		}else{
+			sequelize.query("insert into account(username, password, fullname, role) values(?,?,?,?)", {
+				type: sequelize.QueryTypes.INSERT,
+				replacements: [username, password, fullname, false]
+			}).then(() => {
+				res.send("1")
+				res.end()
+			})
+		}
+	})
 })
 
 app.get('/products', (req, res) => {
@@ -220,7 +238,7 @@ app.post('/cart', (req, res) => {
 	let user_id = req.body.user_id
 	sequelize.query(`select iv.*, p.product_name from invoice iv, products p 
 					 where user_id = ? 
-					 and status = false
+					 and iv.status = false
 					 and p.id = iv.product_id`, {
 			type: sequelize.QueryTypes.SELECT,
 			replacements: [user_id]
@@ -261,6 +279,30 @@ app.post('/cart/paid', (req, res) => {
 						replacements: [true, user_id]
 					})
 				})
+		})
+	})
+})
+
+app.get('/admin/products', (req, res) => {
+	sequelize.query("select * from products", {
+		type: sequelize.QueryTypes.SELECT
+	}).then((val) => {
+		res.send(val)
+	})
+})
+
+app.get('/admin/products/start/:product_id', (req, res) => {
+	let product_id = req.params.product_id
+	sequelize.query("update products set status = ? where id = ?", {
+		type: sequelize.QueryTypes.UPDATE,
+		replacements: [true, product_id]
+	}).then(() => {
+		sequelize.query("select * from products where id = ?", {
+			type: sequelize.QueryTypes.SELECT,
+			replacements: [product_id]
+		}).then(val => {
+			list_products.push(val[0])
+			res.end()
 		})
 	})
 })

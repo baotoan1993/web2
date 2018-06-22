@@ -53,12 +53,19 @@ class Navigation extends Component {
 				</NavLink>
 			</li>
 
+		var canRegis = this.props.state == null ?
+			<li className="nav-item">
+				<NavLink className="nav-link" to="/register">
+				<i className="fa fa-address-card-o" aria-hidden="true" />&nbsp;Đăng Ký
+				</NavLink>
+			</li> : null
+
 		return (
 			<header>
 				<div className="container-fluid" id="header">
 					<nav className="navbar navbar-expand-md navbar-light" style={{ background: '#F0F8FF' }}>
 						{/* Brand */}
-						<NavLink className="navbar-brand" to="/" style={{ textAlign: 'center' }}>
+						<NavLink className="navbar-brand" exact to="/" style={{ textAlign: 'center' }}>
 							<img src="/images/Logo.png" alt="logo.png" style={{ width: '50%' }} />
 						</NavLink>
 						{/* Toggler/collapsibe Button */}
@@ -78,6 +85,8 @@ class Navigation extends Component {
 								{canProduct}
 
 								{canLogin}
+
+								{canRegis}
 							</ul>
 						</div>
 					</nav>
@@ -92,4 +101,4 @@ function mapStateToProps(state) {
 	return { state: state }
 }
 
-export default connect(mapStateToProps)(Navigation);
+export default connect(mapStateToProps, null, null, {pure: false})(Navigation);

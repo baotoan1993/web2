@@ -74,7 +74,7 @@ class Login extends Component {
 										<i className="fa fa-at" />
 									</div>
 									<input type="text" name="username" className="form-control"
-										placeholder="your username" required autoFocus
+										placeholder="tên đăng nhập" required autoFocus
 										onChange={this.handleChange} />
 								</div>
 							</div>
