@@ -1,5 +1,8 @@
 var express = require('express')
 var bodyParser = require('body-parser')
+var multer = require('multer')
+var mv = require('mv')
+
 
 var app = express()
 app.use(bodyParser.json())
@@ -25,7 +28,16 @@ app.use((req, res, next) => {
 	next()
 })
 
+var storage = multer.diskStorage({
+	destination: function (req, file, cb) {
+		cb(null, 'public/images')
+	},
+	filename: function (req, file, cb) {
+		cb(null, file.originalname)
+	}
+})
 
+var upload = multer({ storage: storage })
 
 var list_products = []
 var interval
@@ -125,10 +137,10 @@ app.post('/register', (req, res) => {
 		type: sequelize.QueryTypes.SELECT,
 		replacements: [username]
 	}).then(val => {
-		if(val.length > 0){
+		if (val.length > 0) {
 			res.send("0")
 			res.end()
-		}else{
+		} else {
 			sequelize.query("insert into account(username, password, fullname, role) values(?,?,?,?)", {
 				type: sequelize.QueryTypes.INSERT,
 				replacements: [username, password, fullname, false]
@@ -291,6 +303,14 @@ app.get('/admin/products', (req, res) => {
 	})
 })
 
+app.get('/admin/products/stop', (req, res) => {
+	sequelize.query("select * from products where status = false", {
+		type: sequelize.QueryTypes.SELECT
+	}).then((val) => {
+		res.send(val)
+	})
+})
+
 app.get('/admin/products/start/:product_id', (req, res) => {
 	let product_id = req.params.product_id
 	sequelize.query("update products set status = ? where id = ?", {
@@ -304,5 +324,58 @@ app.get('/admin/products/start/:product_id', (req, res) => {
 			list_products.push(val[0])
 			res.end()
 		})
+	})
+})
+
+app.post('/admin/products/add/picture', upload.single('file'), (req, res) => {
+	console.log(req.file)
+	res.send('1')
+	res.end()
+})
+
+app.post('/admin/products/add', (req, res) => {
+	let product_name = req.body.product_name
+	let product_price = parseInt(req.body.product_price)
+	let category = parseInt(req.body.category)
+	let timer = parseInt(req.body.timer)
+	let image = req.body.image
+	let image_name = req.body.image_name
+	let dest = `public/images/` + image
+	mv(`public/images/${image_name}`, dest, function(err) {
+		if(err){
+			console.log(err)
+		}
+	})
+
+	sequelize.query(`insert into products(product_name,product_price,timer,current_timer,image,category,auction_price, status) values(?,?,?,?,?,?,?,?)`, {
+		type: sequelize.QueryTypes.INSERT,
+		replacements: [product_name, product_price, timer, timer, image, category, product_price, false]
+	}).then(() => {
+		res.send('1')
+		res.end()
+	}).catch(() => {
+		res.send('0')
+		res.end()
+	})
+})
+
+app.post('/admin/products/remove', (req, res) => {
+	let product_id = req.body.product_id
+	sequelize.query("delete from products where id = ?", {
+		type: sequelize.QueryTypes.DELETE,
+		replacements: [product_id]
+	}).then(() => {
+
+		list_products.forEach((x, idx) => {
+			if(x.id == product_id){
+				list_products.splice(idx, 1)
+			}
+		})
+
+		res.send('1')
+		res.end()
+	}).catch(() => {
+		res.send('0')
+		res.end()
 	})
 })

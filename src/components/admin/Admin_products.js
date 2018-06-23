@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom'
 import axios from 'axios'
 
 class Admin_products extends Component {
@@ -42,6 +43,58 @@ class Admin_products extends Component {
 		})
 	}
 
+	handleClickLoadProduct = (e) => {
+		e.preventDefault()
+		axios({
+			url: 'http://localhost:4000/admin/products',
+			method: 'get'
+		})
+			.then(res => {
+				this.setState({
+					products: res.data
+				})
+			})
+	}
+
+	handleClickLoadProductStop = (e) => {
+		e.preventDefault()
+		axios({
+			url: 'http://localhost:4000/admin/products/stop',
+			method: 'get'
+		}).then(res => {
+				this.setState({
+					products: res.data
+				})
+			})
+	}
+
+	handleClickAuctionBegin = (e) => {
+		e.preventDefault()
+		if(window.confirm("Bạn có chắc chắn bắt đầu chạy đấu giá??")){
+			axios({
+				url: 'http://localhost:4000/start',
+				method: 'get'
+			})
+		}
+	}
+
+	handleClickRemove = (e) => {
+		let product_id = e.target.getAttribute('product_id')
+		axios({
+			url: 'http://localhost:4000/admin/products/remove',
+			method: 'post',
+			data: {
+				product_id: product_id
+			}
+		}).then(res => {
+			if(res.data == '1'){
+				alert('xoa san pham thanh cong')
+				window.location.reload()
+			}else{
+				alert('xoa san pham that bai')
+			}
+		})
+	}
 
 	render() {
 		return (
@@ -54,9 +107,21 @@ class Admin_products extends Component {
 								<div className="list-group-item active">
 									<b>DANH MỤC</b>
 								</div>
-								<a href="#" className="list-group-item">Công Nghệ</a>
-								<a href="#" className="list-group-item">Thời Trang</a>
-								<a href="#" className="list-group-item">Làm Đẹp</a>
+								<a href="#" className="list-group-item" 
+									onClick={this.handleClickLoadProduct}>Sản phẩm
+								</a>
+								<a href="#" className="list-group-item"
+									onClick={this.handleClickLoadProductStop}>Sản phẩm đang ngừng
+								</a>
+							</div>
+							<br />
+							<div className="list-group">
+								<div className="list-group-item active">
+									<b>BẮT ĐẦU</b>
+								</div>
+								<a href="#" className="list-group-item" 
+									onClick={this.handleClickAuctionBegin}>Bắt đầu chạy đấu giá
+								</a>
 							</div>
 						</div>
 					</div>
@@ -74,7 +139,8 @@ class Admin_products extends Component {
 									<th>Hình</th>
 									<th>
 										<i className="fa fa-cog" aria-hidden="true" />
-										<button type="button" className="btn btn-success">Thêm</button>
+										<Link className="btn btn-success" 
+											to="/admin/products/add">Thêm</Link>
 									</th>
 									<th className="text-center">Trạng Thái</th>
 								</tr>
@@ -94,8 +160,13 @@ class Admin_products extends Component {
 													<button type="button" className="btn btn-info" style={{ borderRadius: '20%' }}>
 														<i className="fa fa-pencil-square-o fa-3" aria-hidden="true" style={{ textAlign: 'center' }} />
 													</button>
-													<button type="button" className="btn btn-danger" style={{ borderRadius: '20%' }}>
-														<i className="fa fa-trash fa-3" aria-hidden="true" style={{ textAlign: 'center' }} />
+													<button type="button" className="btn btn-danger" 
+															style={{ borderRadius: '20%' }}
+															product_id={data.id}	
+															onClick={this.handleClickRemove}>
+														<i className="fa fa-trash fa-3" aria-hidden="true" 
+															style={{ textAlign: 'center' }} 
+															product_id={data.id}/>
 													</button>
 												</td>
 												<td className="text-center">
