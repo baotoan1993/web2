@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom'
 import axios from 'axios'
+import { connect } from 'react-redux'
 
 class Admin_products extends Component {
 
@@ -13,8 +14,9 @@ class Admin_products extends Component {
 
 	componentWillMount() {
 		axios({
-			url: 'http://localhost:4000/admin/products',
-			method: 'get'
+			url: `http://localhost:4000/admin/products/${localStorage.getItem('userkey')}`,
+			method: 'get',
+			
 		})
 			.then(res => {
 				this.setState({
@@ -46,8 +48,9 @@ class Admin_products extends Component {
 	handleClickLoadProduct = (e) => {
 		e.preventDefault()
 		axios({
-			url: 'http://localhost:4000/admin/products',
-			method: 'get'
+			url: `http://localhost:4000/admin/products/${localStorage.getItem('userkey')}`,
+			method: 'get',
+			
 		})
 			.then(res => {
 				this.setState({
@@ -60,8 +63,9 @@ class Admin_products extends Component {
 		e.preventDefault()
 		axios({
 			url: 'http://localhost:4000/admin/products/stop',
-			method: 'get'
+			method: 'post'
 		}).then(res => {
+			console.log(res.data)
 				this.setState({
 					products: res.data
 				})
@@ -79,21 +83,50 @@ class Admin_products extends Component {
 	}
 
 	handleClickRemove = (e) => {
-		let product_id = e.target.getAttribute('product_id')
+		if(window.confirm('Bạn có chắc chắn xoá sản phẩm này?')){
+			let product_id = e.target.getAttribute('product_id')
+			axios({
+				url: 'http://localhost:4000/admin/products/remove',
+				method: 'post',
+				data: {
+					product_id: product_id
+				}
+			}).then(res => {
+				if(res.data == '1'){
+					alert('xoa san pham thanh cong')
+					window.location.reload()
+				}else{
+					alert('xoa san pham that bai')
+				}
+			})
+		}
+	}
+
+	handleClickEdit = e => {
+		e.preventDefault()
+		console.log(e.target.getAttribute('product_id'))
+	}
+
+	handleClickLogout = e => {
+		e.preventDefault()
+
+
+		this.props.dispatch({ type: 'LOGOUT' })
 		axios({
-			url: 'http://localhost:4000/admin/products/remove',
+			url: 'http://localhost:4000/logout',
 			method: 'post',
 			data: {
-				product_id: product_id
-			}
-		}).then(res => {
-			if(res.data == '1'){
-				alert('xoa san pham thanh cong')
-				window.location.reload()
-			}else{
-				alert('xoa san pham that bai')
+				userkey: localStorage.getItem('userkey')
 			}
 		})
+		alert('Đăng xuất thành công!')
+
+		localStorage.removeItem('user')
+		localStorage.removeItem('userkey')
+		setTimeout(() => {
+
+			window.location.href = '/'
+		}, 300)
 	}
 
 	render() {
@@ -121,6 +154,15 @@ class Admin_products extends Component {
 								</div>
 								<a href="#" className="list-group-item" 
 									onClick={this.handleClickAuctionBegin}>Bắt đầu chạy đấu giá
+								</a>
+							</div>
+							<br />
+							<div className="list-group">
+								<div className="list-group-item active">
+									<b>TÀI KHOẢN</b>
+								</div>
+								<a href="#" className="list-group-item" 
+									onClick={this.handleClickLogout}>Đăng xuất
 								</a>
 							</div>
 						</div>
@@ -157,9 +199,18 @@ class Admin_products extends Component {
 													<img src={"/images/" + data.image} alt={data.image} width="50px;" />
 												</td>
 												<td>
-													<button type="button" className="btn btn-info" style={{ borderRadius: '20%' }}>
-														<i className="fa fa-pencil-square-o fa-3" aria-hidden="true" style={{ textAlign: 'center' }} />
-													</button>
+													<Link 	className="btn btn-info" 
+															style={{ borderRadius: '20%' }}
+															product_id={data.id}	
+															
+															to={`/admin/product/detail/${data.id}`}
+															>
+														<i className="fa fa-pencil-square-o fa-3" 
+															aria-hidden="true" 
+															style={{ textAlign: 'center' }} 
+															product_id={data.id}	
+														/>
+													</Link>
 													<button type="button" className="btn btn-danger" 
 															style={{ borderRadius: '20%' }}
 															product_id={data.id}	
@@ -192,4 +243,4 @@ class Admin_products extends Component {
 	}
 }
 
-export default Admin_products;
+export default connect()(Admin_products);

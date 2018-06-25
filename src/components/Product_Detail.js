@@ -17,7 +17,7 @@ class Product_Detail extends Component {
 	componentWillMount() {
 		let id = this.props.match.params.item
 		let x = setInterval(() => {
-			axios.get('http://localhost:4000/product-item/' + id, {
+			axios.get('http://localhost:4000/product-item/' + id + '/' + localStorage.getItem('userkey'), {
 				method: 'get'
 			})
 				.then(val => {

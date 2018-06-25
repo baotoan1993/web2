@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom'
-import ImageUploader from 'react-images-upload'
-
+import { connect } from 'react-redux'
 import axios from 'axios'
 
 class Admin_product_add extends Component {
@@ -69,15 +68,35 @@ class Admin_product_add extends Component {
 							image_name: this.state.images.name
 						}
 					}).then(val => {
-						if(val.data == '1'){
+						if (val.data == '1') {
 							alert('them thanh cong')
 							window.location.reload()
-						}else{
+						} else {
 							alert('them that bai')
 						}
 					})
 				}
 			})
+	}
+
+	handleClickLogout = e => {
+		e.preventDefault()
+		this.props.dispatch({ type: 'LOGOUT' })
+		axios({
+			url: 'http://localhost:4000/logout',
+			method: 'post',
+			data: {
+				userkey: localStorage.getItem('userkey')
+			}
+		})
+		alert('Đăng xuất thành công!')
+
+		localStorage.removeItem('user')
+		localStorage.removeItem('userkey')
+		setTimeout(() => {
+
+			window.location.href = '/'
+		}, 300)
 	}
 
 	render() {
@@ -93,8 +112,18 @@ class Admin_product_add extends Component {
 								</div>
 								<Link to="/admin/products" className="list-group-item">Sản phẩm</Link>
 							</div>
+							<br />
+							<div className="list-group">
+								<div className="list-group-item active">
+									<b>TÀI KHOẢN</b>
+								</div>
+								<a href="#" className="list-group-item"
+									onClick={this.handleClickLogout}>Đăng xuất
+								</a>
+							</div>
 						</div>
 					</div>
+
 					{/*Ket thuc container_menubar*/}
 					<div className="col-sm-9">
 						<div className="list-group-item bg-info text-white" style={{ marginBottom: 10 }}>
@@ -183,4 +212,4 @@ class Admin_product_add extends Component {
 	}
 }
 
-export default Admin_product_add;
+export default connect()(Admin_product_add);

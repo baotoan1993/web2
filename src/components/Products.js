@@ -17,10 +17,13 @@ class Products extends Component {
 
 	componentWillMount() {
 		var x = setInterval(() => {
-			axios.get('http://localhost:4000/products', {
-				method: 'get'
+			axios.get('http://localhost:4000/products/' + localStorage.getItem('userkey'), {
+				method: 'get',
 			})
 				.then(val => {
+					if(val.data == "Khong the truy cap"){
+						alert("Chưa đăng nhập")
+					}
 					this.setState({
 						products: val.data
 					})
@@ -39,8 +42,12 @@ class Products extends Component {
 		e.preventDefault()
 		clearInterval(this.state.isOut)
 		var x = setInterval(() => {
-			axios.get('http://localhost:4000/products/1', {
-				method: 'get'
+			axios({
+				url: 'http://localhost:4000/products/category', 
+				method: 'post',
+				data:{
+					category: 1
+				}
 			})
 				.then(val => {
 					this.setState({
@@ -55,8 +62,12 @@ class Products extends Component {
 		e.preventDefault()
 		clearInterval(this.state.isOut)
 		var x = setInterval(() => {
-			axios.get('http://localhost:4000/products/2', {
-				method: 'get'
+			axios({
+				url: 'http://localhost:4000/products/category', 
+				method: 'post',
+				data:{
+					category: 2
+				}
 			})
 				.then(val => {
 					this.setState({
@@ -71,8 +82,12 @@ class Products extends Component {
 		e.preventDefault()
 		clearInterval(this.state.isOut)
 		var x = setInterval(() => {
-			axios.get('http://localhost:4000/products/3', {
-				method: 'get'
+			axios({
+				url: 'http://localhost:4000/products/category', 
+				method: 'post',
+				data:{
+					category: 3
+				}
 			})
 				.then(val => {
 					this.setState({

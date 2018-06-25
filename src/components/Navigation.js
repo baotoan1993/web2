@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { NavLink } from 'react-router-dom'
 import { connect } from 'react-redux'
+import axios from 'axios'
 
 class Navigation extends Component {
 
@@ -13,12 +14,25 @@ class Navigation extends Component {
 
 	handleLogout = (event) => {
 		event.preventDefault()
-		alert('Đăng xuất thành công!')
-		localStorage.removeItem('user')
+
 		this.props.dispatch({ type: 'LOGOUT' })
+		axios({
+			url: 'http://localhost:4000/logout',
+			method: 'post',
+			data: {
+				userkey: localStorage.getItem('userkey')
+			}
+		})
+		alert('Đăng xuất thành công!')
+
+		localStorage.removeItem('user')
+		localStorage.removeItem('userkey')
 		setTimeout(() => {
+
 			window.location.href = '/'
 		}, 300)
+
+
 	}
 
 	render() {
@@ -56,7 +70,7 @@ class Navigation extends Component {
 		var canRegis = this.props.state == null ?
 			<li className="nav-item">
 				<NavLink className="nav-link" to="/register">
-				<i className="fa fa-address-card-o" aria-hidden="true" />&nbsp;Đăng Ký
+					<i className="fa fa-address-card-o" aria-hidden="true" />&nbsp;Đăng Ký
 				</NavLink>
 			</li> : null
 
@@ -101,4 +115,4 @@ function mapStateToProps(state) {
 	return { state: state }
 }
 
-export default connect(mapStateToProps, null, null, {pure: false})(Navigation);
+export default connect(mapStateToProps, null, null, { pure: false })(Navigation);

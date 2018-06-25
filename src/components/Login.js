@@ -51,7 +51,7 @@ class Login extends Component {
 	render() {
 		if (this.state.isLogged) {
 			return (
-				<Redirect to="products" />
+				<Redirect to="/" />
 			)
 		}
 		return (

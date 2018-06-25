@@ -108,6 +108,8 @@ app.get("/start", (req, res) => {
 		})
 })
 
+var keyAuth = []
+
 app.post('/login', (req, res) => {
 	var username = req.body.username
 	var password = req.body.password
@@ -120,12 +122,30 @@ app.post('/login', (req, res) => {
 			if (val.length == 0) {
 				res.json({ status: 0 })
 			} else {
+				var str = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+				keyAuth.push(str)
 				res.json({
 					status: 1,
-					user: val[0]
+					user: val[0],
+					userkey: str
 				})
 			}
 		})
+})
+
+app.post('/logout', (req, res) => {
+	let key = req.body.userkey
+	keyAuth.forEach((x, idx) => {
+		if(x == key){
+			keyAuth.splice(idx, 1)
+			return
+		}
+	})
+})
+
+app.get('/random', (req, res) => {
+	var str = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+	res.send(str)
 })
 
 app.post('/register', (req, res) => {
@@ -152,23 +172,35 @@ app.post('/register', (req, res) => {
 	})
 })
 
-app.get('/products', (req, res) => {
+app.get('/products/:userkey', (req, res) => {
+	let userkey = req.params.userkey
+	if(!keyAuth.find(x => x == userkey)){
+		res.send("Khong the truy cap")
+		res.end()
+		return
+	}
 	res.send(list_products)
 })
 
-app.get('/products/:category', (req, res) => {
+app.post('/products/category', (req, res) => {
 	let list = []
-	let category = req.params.category
-
+	let category = req.body.category
 	list_products.forEach(x => {
 		if (x.category == category) {
 			list.push(x)
 		}
 	})
 	res.send(list)
+	res.end()
 })
 
-app.get('/product-item/:id', (req, res) => {
+app.get('/product-item/:id/:userkey', (req, res) => {
+	let userkey = req.params.userkey
+	if(!keyAuth.find(x => x == userkey)){
+		res.send("Khong the truy cap")
+		res.end()
+		return
+	}
 	let id = req.params.id
 	let check = false
 	list_products.forEach(item => {
@@ -295,7 +327,13 @@ app.post('/cart/paid', (req, res) => {
 	})
 })
 
-app.get('/admin/products', (req, res) => {
+app.get('/admin/products/:userkey', (req, res) => {
+	let userkey = req.params.userkey
+	if(!keyAuth.find(x => x == userkey)){
+		res.send("Khong the truy cap")
+		res.end()
+		return
+	}
 	sequelize.query("select * from products", {
 		type: sequelize.QueryTypes.SELECT
 	}).then((val) => {
@@ -303,7 +341,7 @@ app.get('/admin/products', (req, res) => {
 	})
 })
 
-app.get('/admin/products/stop', (req, res) => {
+app.post('/admin/products/stop', (req, res) => {
 	sequelize.query("select * from products where status = false", {
 		type: sequelize.QueryTypes.SELECT
 	}).then((val) => {
@@ -376,6 +414,17 @@ app.post('/admin/products/remove', (req, res) => {
 		res.end()
 	}).catch(() => {
 		res.send('0')
+		res.end()
+	})
+})
+
+app.get('/admin/product/detail/:product_id', (req, res) => {
+	let product_id = req.params.product_id
+	sequelize.query("select * from products where id = ?", {
+		type: sequelize.QueryTypes.SELECT,
+		replacements: [product_id]
+	}).then(val => {
+		res.send(val[0])
 		res.end()
 	})
 })
