@@ -62,13 +62,14 @@ import { connect } from 'react-redux'
 import axios from 'axios'
 
 
-import Navigation from './components/Navigation';
-import Home from './components/Home';
-import Login from './components/Login';
-import Products from './components/Products';
-import Product_Detail from './components/Product_Detail';
-import Cart from './components/Cart';
-import Register from './components/Register';
+import Navigation from './components/client/Navigation';
+import Home from './components/client/Home';
+import Login from './components/client/Login';
+import Products from './components/client/Products';
+import Product_Detail from './components/client/Product_Detail';
+import Cart from './components/client/Cart';
+import Register from './components/client/Register';
+
 import Admin_products from './components/admin/Admin_products';
 import Admin_product_add from './components/admin/Admin_product_add';
 import Admin_product_detail from './components/admin/Admin_product_detail';
@@ -103,7 +104,6 @@ class App extends Component {
 				// console.log(res.data)
 				if (res.data.status == 1) {
 					localStorage.setItem('user', JSON.stringify(res.data.user))
-					console.log(res.data)
 					localStorage.setItem('userkey', res.data.userkey)
 					this.props.dispatch({ type: 'LOGIN', data: res.data.user })
 					setTimeout(() => {
@@ -126,28 +126,24 @@ class App extends Component {
 		let confirm = this.refs.txtRegConfirm.value
 		let fullname = this.refs.txtRegFullname.value
 
-		if (!username || !password || !confirm || !fullname) {
-			alert('Chua dien thong tin')
+		if (confirm != password) {
+			alert('Không khớp xác nhận mật khẩu!')
 		} else {
-			if (confirm != password) {
-				alert('Không khớp xác nhận mật khẩu!')
-			} else {
-				axios({
-					url: 'http://localhost:4000/register',
-					method: 'post',
-					data: {
-						username: username,
-						password: password,
-						fullname: fullname
-					}
-				}).then((res) => {
-					if(res.data == '1')
-						alert('đăng ký thành công!')
-					else{
-						alert('Tên tài khoản đang được sử dụng!!!')
-					}
-				})
-			}
+			axios({
+				url: 'http://localhost:4000/register',
+				method: 'post',
+				data: {
+					username: username,
+					password: password,
+					fullname: fullname
+				}
+			}).then((res) => {
+				if (res.data == '1')
+					alert('đăng ký thành công!')
+				else {
+					alert('Tên tài khoản đang được sử dụng!!!')
+				}
+			})
 		}
 	}
 
@@ -159,8 +155,6 @@ class App extends Component {
 						<Router>
 							<Switch>
 								<Route exact path='/' render={User_Com(Home)} />
-								<Route path='/login' render={User_Com(Login)} />
-								<Route path='/register' render={User_Com(Register)} />
 								<Route path='/products' render={User_Com(Products)} />
 								<Route path='/product-item/:item' render={User_Com(Product_Detail)} />
 								<Route path='/cart' render={User_Com(Cart)} />
@@ -186,60 +180,68 @@ class App extends Component {
 			}
 		} else {
 			return (
-				<div>
-					{/* Form*/}
-					<div className="form">
-						<div className="form-toggle" />
-						<div className="form-panel one">
-							<div className="form-header">
-								<h1>ĐĂNG NHẬP TÀI KHOẢN</h1>
-							</div>
-							<div className="form-content">
-								<form onSubmit={this.handleLogin}>
-									<div className="form-group welcome">
-										<label htmlFor="username">Tên đăng nhập</label>
-										<input type="text" required ref="txtUsername" />
+				<div className="login-wrap">
+					<div className="login-html">
+						<input id="tab-1" type="radio" name="tab" className="sign-in" defaultChecked />
+						<label htmlFor="tab-1" className="tab">Đăng Nhập</label>
+						<input id="tab-2" type="radio" name="tab" className="sign-up" />
+						<label htmlFor="tab-2" className="tab">Đăng ký</label>
+						<div className="login-form">
+							<form onSubmit={this.handleLogin}>
+								<div className="sign-in-htm">
+									<div className="group">
+										<label htmlFor="user" className="label">Tên đăng nhập</label>
+										<input type="text" className="input" required ref="txtUsername" />
 									</div>
-									<div className="form-group welcome">
-										<label htmlFor="password">Mật khẩu</label>
-										<input type="password" required ref="txtPassword" />
+									<div className="group">
+										<label htmlFor="pass" className="label">Mật khẩu</label>
+										<input type="password" className="input"
+											data-type="password" required
+											ref="txtPassword" />
 									</div>
-									<div className="form-group welcome">
-										<button type="submit">Đăng nhập</button>
+									<div className="group">
+										<input type="submit" className="button" defaultValue="ĐĂNG NHẬP" />
 									</div>
-								</form>
-							</div>
-						</div>
-						<div className="form-panel two">
-							<div className="form-header">
-								<h1>ĐĂNG KÝ TÀI KHOẢN</h1>
-							</div>
-							<div className="form-content">
-								<form>
-									<div className="form-group welcome">
-										<label htmlFor="username">Họ tên</label>
-										<input type="text" required ref="txtRegFullname" />
+									<div className="hr" />
+									<div className="foot-lnk">
+										<h3>Chào mừng trở lại!!!</h3>
 									</div>
-									<div className="form-group welcome">
-										<label htmlFor="username">Tên đăng nhập</label>
-										<input type="text" required ref="txtRegUsername" />
+								</div>
+							</form>
+							<div className="sign-up-htm">
+								<form onSubmit={this.handleRegister}>
+									<div className="group">
+										<label htmlFor="user" className="label">Tên đăng nhập</label>
+										<input type="text" className="input" required
+											ref="txtRegUsername" />
 									</div>
-									<div className="form-group welcome">
-										<label htmlFor="password">Mật khẩu</label>
-										<input type="password" required ref="txtRegPassword" />
+									<div className="group">
+										<label htmlFor="pass" className="label">Mật khẩu</label>
+										<input type="password" className="input"
+											data-type="password" required
+											ref="txtRegPassword" />
 									</div>
-									<div className="form-group welcome">
-										<label htmlFor="cpassword">Xác nhận mật khẩu</label>
-										<input type="password" required ref="txtRegConfirm" />
+									<div className="group">
+										<label htmlFor="pass" className="label">Xác nhận mật khẩu</label>
+										<input type="password" className="input"
+											data-type="password" required
+											ref="txtRegConfirm" />
 									</div>
-									<div className="form-group welcome">
-										<button type="submit" onClick={this.handleRegister}>Đăng ký</button>
+									<div className="group">
+										<label htmlFor="pass" className="label">Họ tên</label>
+										<input type="text" className="input" required
+											ref="txtRegFullname" />
 									</div>
+									<div className="group">
+										<input type="submit" className="button" defaultValue="ĐĂNG KÝ" />
+									</div>
+									<div className="hr" />
 								</form>
 							</div>
 						</div>
 					</div>
 				</div>
+
 
 			)
 		}

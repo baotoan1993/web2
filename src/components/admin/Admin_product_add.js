@@ -66,6 +66,9 @@ class Admin_product_add extends Component {
 							timer: timer,
 							image: image,
 							image_name: this.state.images.name
+						},
+						headers: {
+							Authorization: localStorage.getItem('userkey')
 						}
 					}).then(val => {
 						if (val.data == '1') {

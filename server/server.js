@@ -21,10 +21,11 @@ var sequelize = new Sequelize({
 app.use((req, res, next) => {
 	res.setHeader('Access-Control-Allow-Origin', '*');
 	res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-	res.setHeader('Access-Control-Allow-Headers', 'Content-type');
-	res.setHeader('Access-Control-Allow-Headers', 'X-Signature');
-	res.setHeader('Access-Control-Allow-Headers', 'X-Key');
-	res.setHeader("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers")
+	// res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+	// res.setHeader('Access-Control-Allow-Headers', 'Authorization');
+	// res.setHeader('Access-Control-Allow-Headers', 'X-Signature');
+	// res.setHeader('Access-Control-Allow-Headers', 'X-Key');
+	res.setHeader("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization")
 	next()
 })
 
@@ -40,12 +41,20 @@ var storage = multer.diskStorage({
 var upload = multer({ storage: storage })
 
 var list_products = []
+var keyAuth = []
 var interval
 app.listen(4000, () => {
 	console.log('started port 4000')
+	console.log("key Auth: ", keyAuth)
 })
 
 app.get("/start", (req, res) => {
+	let userkey = req.headers.authorization
+	if(!keyAuth.find(x => x == userkey)){
+		res.send("Khong the truy cap")
+		res.end()
+		return
+	}
 	sequelize.query("select * from products",
 		{
 			type: sequelize.QueryTypes.SELECT
@@ -108,7 +117,7 @@ app.get("/start", (req, res) => {
 		})
 })
 
-var keyAuth = []
+
 
 app.post('/login', (req, res) => {
 	var username = req.body.username
@@ -126,7 +135,12 @@ app.post('/login', (req, res) => {
 				keyAuth.push(str)
 				res.json({
 					status: 1,
-					user: val[0],
+					user: {
+						id: val[0].id,
+						fullname: val[0].fullname,
+						role: val[0].role
+
+					},
 					userkey: str
 				})
 			}
@@ -141,12 +155,13 @@ app.post('/logout', (req, res) => {
 			return
 		}
 	})
+	console.log(keyAuth)
 })
 
-app.get('/random', (req, res) => {
-	var str = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-	res.send(str)
-})
+// app.get('/random', (req, res) => {
+// 	var str = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+// 	res.send(str)
+// })
 
 app.post('/register', (req, res) => {
 	let username = req.body.username
@@ -327,8 +342,9 @@ app.post('/cart/paid', (req, res) => {
 	})
 })
 
-app.get('/admin/products/:userkey', (req, res) => {
-	let userkey = req.params.userkey
+
+app.get('/admin/products', (req, res) => {
+	let userkey = req.headers.authorization
 	if(!keyAuth.find(x => x == userkey)){
 		res.send("Khong the truy cap")
 		res.end()
@@ -372,6 +388,12 @@ app.post('/admin/products/add/picture', upload.single('file'), (req, res) => {
 })
 
 app.post('/admin/products/add', (req, res) => {
+	let userkey = req.headers.authorization
+	if(!keyAuth.find(x => x == userkey)){
+		res.send("Khong the truy cap")
+		res.end()
+		return
+	}
 	let product_name = req.body.product_name
 	let product_price = parseInt(req.body.product_price)
 	let category = parseInt(req.body.category)

@@ -13,7 +13,7 @@ class Product_Item extends Component {
 			<div className="col-sm-2">
 				<Link to={"/product-item/" + this.props.itemId} className="thumb">
 					<div className="article">
-						<img className="img-fluid" src={"images/" + this.props.image} />
+						<img className="img-fluid" alt={this.props.image} src={"images/" + this.props.image} />
 					</div>
 					<div className="row">
 						<div className="col-6 text-center">

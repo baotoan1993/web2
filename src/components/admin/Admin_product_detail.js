@@ -23,11 +23,11 @@ class Admin_product_detail extends Component {
 			url: 'http://localhost:4000/admin/product/detail/' + product_id,
 			method: 'get'
 		}).then(val => {
-			let timer = parseInt(val.data.timer)
+			let timer = parseInt(val.data.timer, 10)
 			
-			let hour = Math.round(timer/3600)
-			let minute = Math.round((timer - (hour * 3600)) / 60)
-			let second = Math.round(timer - ((minute * 60) + (hour * 3600)))
+			let hour = Math.floor(timer/3600)
+			let minute = Math.floor((timer - (hour * 3600)) / 60)
+			let second = timer - ((minute * 60) + (hour * 3600))
 			// console.log(hour, minute, second)
 			this.setState({
 				product: val.data,
@@ -82,7 +82,7 @@ class Admin_product_detail extends Component {
 								<div className="list-group-item active">
 									<b>TÀI KHOẢN</b>
 								</div>
-								<a href="#" className="list-group-item" 
+								<a href="/" className="list-group-item" 
 									onClick={this.handleClickLogout}>Đăng xuất
 								</a>
 							</div>

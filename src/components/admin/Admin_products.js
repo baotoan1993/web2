@@ -14,8 +14,11 @@ class Admin_products extends Component {
 
 	componentWillMount() {
 		axios({
-			url: `http://localhost:4000/admin/products/${localStorage.getItem('userkey')}`,
+			url: `http://localhost:4000/admin/products`,
 			method: 'get',
+			headers: {
+				Authorization: localStorage.getItem('userkey')
+			}
 			
 		})
 			.then(res => {
@@ -48,8 +51,11 @@ class Admin_products extends Component {
 	handleClickLoadProduct = (e) => {
 		e.preventDefault()
 		axios({
-			url: `http://localhost:4000/admin/products/${localStorage.getItem('userkey')}`,
+			url: `http://localhost:4000/admin/products`,
 			method: 'get',
+			headers: {
+				Authorization: localStorage.getItem('userkey')
+			}
 			
 		})
 			.then(res => {
@@ -77,7 +83,10 @@ class Admin_products extends Component {
 		if(window.confirm("Bạn có chắc chắn bắt đầu chạy đấu giá??")){
 			axios({
 				url: 'http://localhost:4000/start',
-				method: 'get'
+				method: 'get',
+				headers: {
+					Authorization: localStorage.getItem('userkey')
+				}
 			})
 		}
 	}
@@ -140,10 +149,10 @@ class Admin_products extends Component {
 								<div className="list-group-item active">
 									<b>DANH MỤC</b>
 								</div>
-								<a href="#" className="list-group-item" 
+								<a href="/" className="list-group-item" 
 									onClick={this.handleClickLoadProduct}>Sản phẩm
 								</a>
-								<a href="#" className="list-group-item"
+								<a href="/" className="list-group-item"
 									onClick={this.handleClickLoadProductStop}>Sản phẩm đang ngừng
 								</a>
 							</div>
@@ -152,7 +161,7 @@ class Admin_products extends Component {
 								<div className="list-group-item active">
 									<b>BẮT ĐẦU</b>
 								</div>
-								<a href="#" className="list-group-item" 
+								<a href="/" className="list-group-item" 
 									onClick={this.handleClickAuctionBegin}>Bắt đầu chạy đấu giá
 								</a>
 							</div>
@@ -161,7 +170,7 @@ class Admin_products extends Component {
 								<div className="list-group-item active">
 									<b>TÀI KHOẢN</b>
 								</div>
-								<a href="#" className="list-group-item" 
+								<a href="/" className="list-group-item" 
 									onClick={this.handleClickLogout}>Đăng xuất
 								</a>
 							</div>
@@ -192,7 +201,7 @@ class Admin_products extends Component {
 									this.state.products.map((data, idx) => {
 										return (
 											<tr key={idx}>
-												<td scope="row">{data.id}</td>
+												<td>{data.id}</td>
 												<td>{data.product_name}</td>
 												<td>{new Date(data.timer * 1000).toISOString().substr(11, 8)}</td>
 												<td>
