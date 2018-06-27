@@ -98,6 +98,26 @@ class Products extends Component {
 		this.setState({ isOut: x })
 	}
 
+	handleChangeAll = e => {
+		e.preventDefault()
+		clearInterval(this.state.isOut)
+		var x = setInterval(() => {
+			axios({
+				url: 'http://localhost:4000/products/category', 
+				method: 'post',
+				data:{
+					category: 0
+				}
+			})
+				.then(val => {
+					this.setState({
+						products: val.data
+					})
+				})
+		}, 1000)
+		this.setState({ isOut: x })
+	}
+
 	render() {
 		if(this.props.state == null)
 			return <Redirect to="/login" />
@@ -112,6 +132,9 @@ class Products extends Component {
 					</li>
 					<li className="nav-item">
 						<NavLink className="nav-link" to="#" onClick={this.handleChangeFash}>Thời trang</NavLink>
+					</li>
+					<li className="nav-item">
+						<NavLink className="nav-link" to="#" onClick={this.handleChangeAll}>Tất cả</NavLink>
 					</li>
 				</ul>
 				<div className="container-fluid">

@@ -38,7 +38,10 @@ class Admin_products extends Component {
 		}).then(() => {
 			axios({
 				url: 'http://localhost:4000/admin/products',
-				method: 'get'
+				method: 'get',
+				headers: {
+					Authorization: localStorage.getItem('userkey')
+				}
 			})
 				.then(res => {
 					this.setState({

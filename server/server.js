@@ -207,6 +207,11 @@ app.get('/products/:userkey', (req, res) => {
 app.post('/products/category', (req, res) => {
 	let list = []
 	let category = req.body.category
+	if(category == 0){
+		res.send(list_products)
+		res.end()
+		return
+	}
 	list_products.forEach(x => {
 		if (x.category == category) {
 			list.push(x)
