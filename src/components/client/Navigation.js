@@ -36,6 +36,15 @@ class Navigation extends Component {
 	}
 
 	render() {
+		var canMyAuction = this.props.state == null ?
+			null
+			:
+			<li className="nav-item">
+				<NavLink className="nav-link" to="/myauction">
+					<i className="fa fa-product-hunt" aria-hidden="true" />&nbsp;Đấu giá
+				</NavLink>
+			</li>
+
 		var canCart = this.props.state == null ?
 			null
 			:
@@ -94,6 +103,8 @@ class Navigation extends Component {
 										<i className="fa fa-home" aria-hidden="true" />&nbsp;Trang Chủ
 									</NavLink>
 								</li>
+								{canMyAuction}
+
 								{canCart}
 
 								{canProduct}

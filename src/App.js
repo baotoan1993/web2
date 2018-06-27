@@ -6,11 +6,9 @@ import axios from 'axios'
 
 import Navigation from './components/client/Navigation';
 import Home from './components/client/Home';
-import Login from './components/client/Login';
 import Products from './components/client/Products';
 import Product_Detail from './components/client/Product_Detail';
 import Cart from './components/client/Cart';
-import Register from './components/client/Register';
 
 import Admin_products from './components/admin/Admin_products';
 import Admin_product_add from './components/admin/Admin_product_add';
@@ -19,6 +17,7 @@ import Admin_product_detail from './components/admin/Admin_product_detail';
 import './Appp.css'
 import Admin_navigation from './components/admin/Admin_navigation';
 import Admin_invoice from './components/admin/Admin_invoice';
+import My_Auction from './components/client/My_Auction';
 
 const User_Com = (Com) => {
 	return (
@@ -112,6 +111,7 @@ class App extends Component {
 								<Route path='/products' render={User_Com(Products)} />
 								<Route path='/product-item/:item' render={User_Com(Product_Detail)} />
 								<Route path='/cart' render={User_Com(Cart)} />
+								<Route path='/myauction' render={User_Com(My_Auction)} />
 							</Switch>
 
 						</Router>
@@ -122,11 +122,6 @@ class App extends Component {
 					<div>
 						<Router>
 							<Switch>
-								{/* <Route exact path="/" component={Admin_products} />
-								<Route exact path="/admin/products" component={Admin_products} />
-								<Route path="/admin/products/add" component={Admin_product_add} />
-								<Route path="/admin/product/detail/:id" component={Admin_product_detail} /> */}
-
 								<Route exact path="/" render={Admin_com(Admin_products)} />
 								<Route exact path="/admin/products" render={Admin_com(Admin_products)} />
 								<Route path="/admin/products/add" render={Admin_com(Admin_product_add)} />

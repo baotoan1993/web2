@@ -43,88 +43,89 @@ var upload = multer({ storage: storage })
 var list_products = []
 var keyAuth = []
 var interval
+var isRunning = false
+
+
 app.listen(4000, () => {
 	console.log('started port 4000')
 	console.log("key Auth: ", keyAuth)
 })
 
+
 app.get("/start", (req, res) => {
 	let userkey = req.headers.authorization
-	if(!keyAuth.find(x => x.userkey == userkey)){
+	if (!keyAuth.find(x => x.userkey == userkey)) {
 		res.send("Khong the truy cap")
 		res.end()
 		return
 	}
-	sequelize.query("select * from products where status = true",
-		{
-			type: sequelize.QueryTypes.SELECT
-		})
-		.then(val => {
-			list_products = val
-			interval = setInterval(function () {
-				list_products.forEach((x, idx) => {
-					if (x.current_timer > 0) {
-						list_products[idx].current_timer--
-					}
-					else {
-						// list_products[idx].current_timer = x.timer
-						// console.log("start: cap nhat aution_price (products)")
-						sequelize.query(`update products
-										 set auction_price = product_price
-										 where id = ?`, {
-								type: sequelize.QueryTypes.UPDATE,
-								replacements: [x.id]
-							}).then(() => {
-								// console.log("start: row tu bang auctioning")
-								sequelize.query("select * from auctioning where product_id = ?", {
+	if (isRunning == false) {
+		sequelize.query("select * from products where status = true",
+			{
+				type: sequelize.QueryTypes.SELECT
+			})
+			.then(val => {
+				list_products = val
+				interval = setInterval(function () {
+					list_products.forEach((x, idx) => {
+						if (x.current_timer > 0) {
+							list_products[idx].current_timer--
+						}
+						else {
+
+							sequelize.query(
+								`SELECT f.user_id, f.product_id, f.auction_price from (
+								select product_id, max(auction_price) as price
+								from auctioning_temp
+								group by product_id
+							)as x inner join auctioning_temp as f 
+								on f.product_id = x.product_id and f.auction_price = x.price
+								where f.product_id = ?`, {
 									type: sequelize.QueryTypes.SELECT,
 									replacements: [x.id]
-								})
-									.then(au => {
-										if (au.length > 0) {
-											// console.log("start: them vao bang invoice")
-											sequelize.query(`insert into invoice(user_id, product_id, price, status)
-													 values(?,?,?,false)`, {
-													type: sequelize.QueryTypes.INSERT,
-													replacements: [au[0].user_id, au[0].product_id, au[0].price]
-												})
-												.then(() => {
-													// console.log("start: xoa row trong auctioning")
-													sequelize.query(`delete from auctioning where product_id = ?`, {
-														type: sequelize.QueryTypes.DELETE,
-														replacements: [au[0].product_id]
-													}).then(() => {
-														list_products.splice(idx, 1)
-													})
+								}).then((au_max) => {
+									if (au_max.length > 0) {
+										sequelize.query(`insert into invoice(user_id, product_id, price, status)
+													values(?,?,?,false)`, {
+												type: sequelize.QueryTypes.INSERT,
+												replacements: [au_max[0].user_id, au_max[0].product_id, au_max[0].auction_price]
+											}).then(() => {
+												sequelize.query(`delete from auctioning_temp where product_id = ?`, {
+													type: sequelize.QueryTypes.DELETE,
+													replacements: [x.id]
 												}).then(() => {
-													sequelize.query(`update products set status = ? where id =?`, {
-														type: sequelize.QueryTypes.UPDATE,
-														replacements: [false, x.id]
-													})
+													// sequelize.query(`update products set status = ? where id =?`, {
+													// 	type: sequelize.QueryTypes.UPDATE,
+													// 	replacements: [false, x.id]
+													// })
+													list_products.splice(idx, 1)
 												})
-										} else {
-											sequelize.query(`update products set status = ? where id =?`, {
-												type: sequelize.QueryTypes.UPDATE,
-												replacements: [false, x.id]
 											})
-											list_products.splice(idx, 1)
-										}
-									})
-							})
-					}
-				})
-			}, 1000)
-		})
+									} else {
+										sequelize.query(`update products set status = ? where id =?`, {
+											type: sequelize.QueryTypes.UPDATE,
+											replacements: [false, x.id]
+										})
+										list_products.splice(idx, 1)
+									}
+								})
+
+						}
+					})
+				}, 1000)
+			})
+		isRunning = true
+		res.end()
+	}
+
 })
-
-
 
 app.post('/login', (req, res) => {
 	var username = req.body.username
 	var password = req.body.password
 
-	if(keyAuth.find(x => x.username == username)){
-		res.send({status: 0, message: "Tài khoản này đang đăng nhập"})
+	if (keyAuth.find(x => x.username == username)) {
+		res.send({ status: 0, message: "Tài khoản này đang đăng nhập" })
 		res.end()
 		return
 	}
@@ -139,7 +140,7 @@ app.post('/login', (req, res) => {
 				res.json({ status: 0, message: 'Tên đăng nhập hoặc mật khẩu không đúng!' })
 			} else {
 				var str = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-				keyAuth.push({username: val[0].username, userkey: str})
+				keyAuth.push({ username: val[0].username, userkey: str })
 				res.json({
 					status: 1,
 					user: {
@@ -157,7 +158,7 @@ app.post('/login', (req, res) => {
 app.post('/logout', (req, res) => {
 	let key = req.body.userkey
 	keyAuth.forEach((x, idx) => {
-		if(x.userkey == key){
+		if (x.userkey == key) {
 			keyAuth.splice(idx, 1)
 			return
 		}
@@ -165,10 +166,6 @@ app.post('/logout', (req, res) => {
 	console.log(keyAuth)
 })
 
-// app.get('/random', (req, res) => {
-// 	var str = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-// 	res.send(str)
-// })
 
 app.post('/register', (req, res) => {
 	let username = req.body.username
@@ -196,7 +193,7 @@ app.post('/register', (req, res) => {
 
 app.get('/products/:userkey', (req, res) => {
 	let userkey = req.params.userkey
-	if(!keyAuth.find(x => x.userkey == userkey)){
+	if (!keyAuth.find(x => x.userkey == userkey)) {
 		res.send("Khong the truy cap")
 		res.end()
 		return
@@ -207,7 +204,7 @@ app.get('/products/:userkey', (req, res) => {
 app.post('/products/category', (req, res) => {
 	let list = []
 	let category = req.body.category
-	if(category == 0){
+	if (category == 0) {
 		res.send(list_products)
 		res.end()
 		return
@@ -223,7 +220,7 @@ app.post('/products/category', (req, res) => {
 
 app.get('/product-item/:id/:userkey', (req, res) => {
 	let userkey = req.params.userkey
-	if(!keyAuth.find(x => x.userkey == userkey)){
+	if (!keyAuth.find(x => x.userkey == userkey)) {
 		res.send("Khong the truy cap")
 		res.end()
 		return
@@ -242,66 +239,60 @@ app.get('/product-item/:id/:userkey', (req, res) => {
 	}
 })
 
+
 app.post('/auction', (req, res) => {
 	let product_id = parseInt(req.body.product_id)
 	let user_id = parseInt(req.body.user_id)
 	let price = parseInt(req.body.price)
 
-	// console.log(product_id, user_id, price)
-
-	/*
-		-kiem tra trong bang auctioning
-		--nếu tồn tại dòng có product_id và price > price cũ thì cập nhật lại user_id và price
-		---thay đổi auction_price bên bảng products
-		--thêm mới product_id và user_id và price
-		----cập nhật lại list_product
-	*/
-
-	sequelize.query("select * from auctioning where product_id = ?", {
+	//kiểm tra trong bảng auctioning_temp có tồn tại chưa
+	sequelize.query(`select * from auctioning_temp where user_id=? and product_id=?`, {
 		type: sequelize.QueryTypes.SELECT,
-		replacements: [product_id]
-	})
-		.then(x => {
-			if (x.length > 0) { //sản phẩm đã có người đấu giá
-				sequelize.query("update auctioning set user_id = ?, price = ? where product_id = ?", {
-					type: sequelize.QueryTypes.UPDATE,
-					replacements: [user_id, price, product_id]
-				}).then(() => {
-					// sequelize.query(`update products set auction_price = ? where id = ?`, {
-					// 	type: sequelize.QueryTypes.UPDATE,
-					// 	replacements: [price, product_id]
-					// }).then(() => {
-					list_products.forEach((x, idx) => {
-						if (x.id == product_id) {
-							list_products[idx].auction_price = price
-							if (x.current_timer < 20) {
-								list_products[idx].current_timer = 20
-							}
-						}
-						// })
+		replacements: [user_id, product_id]
+	}).then(auc => {
+		if (auc.length == 0) { // chưa ai đấu giá
+			sequelize.query(`insert into auctioning_temp values(?,?,?,?)`, {
+				type: sequelize.QueryTypes.INSERT,
+				replacements: [user_id, product_id, price, true]
+			}).then(() => {
+				sequelize.query(`update auctioning_temp set win = ?
+							 where user_id<>? and product_id=?`, {
+						type: sequelize.QueryTypes.INSERT,
+						replacements: [false, user_id, product_id]
 					})
-				}).then(() => {
-					res.end()
-				})
-
-			} else {
-				sequelize.query("insert into auctioning values(?,?,?)", {
+				var idx = list_products.findIndex(x => x.id == product_id)
+				list_products[idx].auction_price = price
+				res.end()
+			})
+		} else {
+			sequelize.query(`update auctioning_temp set auction_price = ?, win = ?
+							 where user_id=? and product_id=?`, {
 					type: sequelize.QueryTypes.INSERT,
-					replacements: [product_id, user_id, price]
+					replacements: [price, true, user_id, product_id]
 				}).then(() => {
-					list_products.forEach((x, idx) => {
-						if (x.id == product_id) {
-							list_products[idx].auction_price = price
-							if (x.current_timer < 20) {
-								list_products[idx].current_timer = 20
-							}
-						}
-					})
-				}).then(() => {
+					sequelize.query(`update auctioning_temp set win = ?
+							 where user_id<>? and product_id=?`, {
+							type: sequelize.QueryTypes.INSERT,
+							replacements: [false, user_id, product_id]
+						})
+					var idx = list_products.findIndex(x => x.id == product_id)
+					list_products[idx].auction_price = price
 					res.end()
 				})
+		}
+	})
+})
 
-			}
+app.post('/myaution', (req, res) => {
+	let user_id = req.body.user_id
+	sequelize.query(`select au.*, p.product_name from auctioning_temp au, products p 
+					 where user_id=?
+					 and p.id = au.product_id`, {
+			type: sequelize.QueryTypes.SELECT,
+			replacements: [user_id]
+		}).then(val => {
+			res.send(val)
+			res.end()
 		})
 })
 
@@ -357,7 +348,7 @@ app.post('/cart/paid', (req, res) => {
 
 app.get('/admin/products', (req, res) => {
 	let userkey = req.headers.authorization
-	if(!keyAuth.find(x => x.userkey == userkey)){
+	if (!keyAuth.find(x => x.userkey == userkey)) {
 		res.send("Khong the truy cap")
 		res.end()
 		return
@@ -401,7 +392,7 @@ app.post('/admin/products/add/picture', upload.single('file'), (req, res) => {
 
 app.post('/admin/products/add', (req, res) => {
 	let userkey = req.headers.authorization
-	if(!keyAuth.find(x => x.userkey == userkey)){
+	if (!keyAuth.find(x => x.userkey == userkey)) {
 		res.send("Khong the truy cap")
 		res.end()
 		return
@@ -413,8 +404,8 @@ app.post('/admin/products/add', (req, res) => {
 	let image = req.body.image
 	let image_name = req.body.image_name
 	let dest = `public/images/` + image
-	mv(`public/images/${image_name}`, dest, function(err) {
-		if(err){
+	mv(`public/images/${image_name}`, dest, function (err) {
+		if (err) {
 			console.log(err)
 		}
 	})
@@ -439,7 +430,7 @@ app.post('/admin/products/remove', (req, res) => {
 	}).then(() => {
 
 		list_products.forEach((x, idx) => {
-			if(x.id == product_id){
+			if (x.id == product_id) {
 				list_products.splice(idx, 1)
 			}
 		})
@@ -465,23 +456,23 @@ app.get('/admin/product/detail/:product_id', (req, res) => {
 
 app.get('/admin/invoice', (req, res) => {
 	let userkey = req.headers.authorization
-	if(!keyAuth.find(x => x.userkey == userkey)){
+	if (!keyAuth.find(x => x.userkey == userkey)) {
 		res.send("Khong the truy cap")
 		res.end()
 		return
 	}
 	sequelize.query(`select i.*, p.product_name from invoice_done i, products p
 					where i.product_id = p.id`, {
-		type: sequelize.QueryTypes.SELECT
-	}).then(val => {
-		res.send(val)
-		res.end()
-	})
+			type: sequelize.QueryTypes.SELECT
+		}).then(val => {
+			res.send(val)
+			res.end()
+		})
 })
 
 app.post('/admin/invoice/deliver', (req, res) => {
 	let userkey = req.headers.authorization
-	if(!keyAuth.find(x => x.userkey == userkey)){
+	if (!keyAuth.find(x => x.userkey == userkey)) {
 		res.send("Khong the truy cap")
 		res.end()
 		return
@@ -499,7 +490,7 @@ app.post('/admin/invoice/deliver', (req, res) => {
 
 app.post('/admin/products/change', (req, res) => {
 	let userkey = req.headers.authorization
-	if(!keyAuth.find(x => x.userkey == userkey)){
+	if (!keyAuth.find(x => x.userkey == userkey)) {
 		res.send("Khong the truy cap")
 		res.end()
 		return
@@ -507,8 +498,8 @@ app.post('/admin/products/change', (req, res) => {
 	let { product_id, product_name, category, product_price, timer } = req.body
 	sequelize.query(`update products SET product_name=?, product_price=?, timer=?, current_timer=?, category=?, auction_price=?
 	WHERE id=?`, {
-		type: sequelize.QueryTypes.UPDATE,
-		replacements: [product_name, product_price, timer, timer, category, product_price, product_id]
-	})
+			type: sequelize.QueryTypes.UPDATE,
+			replacements: [product_name, product_price, timer, timer, category, product_price, product_id]
+		})
 	res.end()
 })
