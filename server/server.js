@@ -50,12 +50,12 @@ app.listen(4000, () => {
 
 app.get("/start", (req, res) => {
 	let userkey = req.headers.authorization
-	if(!keyAuth.find(x => x == userkey)){
+	if(!keyAuth.find(x => x.userkey == userkey)){
 		res.send("Khong the truy cap")
 		res.end()
 		return
 	}
-	sequelize.query("select * from products",
+	sequelize.query("select * from products where status = true",
 		{
 			type: sequelize.QueryTypes.SELECT
 		})
@@ -122,6 +122,13 @@ app.get("/start", (req, res) => {
 app.post('/login', (req, res) => {
 	var username = req.body.username
 	var password = req.body.password
+
+	if(keyAuth.find(x => x.username == username)){
+		res.send({status: 0, message: "Tài khoản này đang đăng nhập"})
+		res.end()
+		return
+	}
+
 	sequelize.query("select * from account where username = ? and password = ?",
 		{
 			type: sequelize.QueryTypes.SELECT,
@@ -129,10 +136,10 @@ app.post('/login', (req, res) => {
 		})
 		.then((val) => {
 			if (val.length == 0) {
-				res.json({ status: 0 })
+				res.json({ status: 0, message: 'Tên đăng nhập hoặc mật khẩu không đúng!' })
 			} else {
 				var str = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-				keyAuth.push(str)
+				keyAuth.push({username: val[0].username, userkey: str})
 				res.json({
 					status: 1,
 					user: {
@@ -150,7 +157,7 @@ app.post('/login', (req, res) => {
 app.post('/logout', (req, res) => {
 	let key = req.body.userkey
 	keyAuth.forEach((x, idx) => {
-		if(x == key){
+		if(x.userkey == key){
 			keyAuth.splice(idx, 1)
 			return
 		}
@@ -189,7 +196,7 @@ app.post('/register', (req, res) => {
 
 app.get('/products/:userkey', (req, res) => {
 	let userkey = req.params.userkey
-	if(!keyAuth.find(x => x == userkey)){
+	if(!keyAuth.find(x => x.userkey == userkey)){
 		res.send("Khong the truy cap")
 		res.end()
 		return
@@ -211,7 +218,7 @@ app.post('/products/category', (req, res) => {
 
 app.get('/product-item/:id/:userkey', (req, res) => {
 	let userkey = req.params.userkey
-	if(!keyAuth.find(x => x == userkey)){
+	if(!keyAuth.find(x => x.userkey == userkey)){
 		res.send("Khong the truy cap")
 		res.end()
 		return
@@ -328,8 +335,8 @@ app.post('/cart/paid', (req, res) => {
 		replacements: [user_id]
 	}).then(val => {
 		val.forEach(x => {
-			sequelize.query(`insert into invoice_done (product_id, user_id, address, phone, fullname) 
-							values(?,?,?,?,?)`, {
+			sequelize.query(`insert into invoice_done (product_id, user_id, address, phone, fullname, status) 
+							values(?,?,?,?,?,false)`, {
 					type: sequelize.QueryTypes.INSERT,
 					replacements: [x.product_id, user_id, address, phone, fullname]
 				}).then(() => {
@@ -345,7 +352,7 @@ app.post('/cart/paid', (req, res) => {
 
 app.get('/admin/products', (req, res) => {
 	let userkey = req.headers.authorization
-	if(!keyAuth.find(x => x == userkey)){
+	if(!keyAuth.find(x => x.userkey == userkey)){
 		res.send("Khong the truy cap")
 		res.end()
 		return
@@ -389,7 +396,7 @@ app.post('/admin/products/add/picture', upload.single('file'), (req, res) => {
 
 app.post('/admin/products/add', (req, res) => {
 	let userkey = req.headers.authorization
-	if(!keyAuth.find(x => x == userkey)){
+	if(!keyAuth.find(x => x.userkey == userkey)){
 		res.send("Khong the truy cap")
 		res.end()
 		return
@@ -449,4 +456,54 @@ app.get('/admin/product/detail/:product_id', (req, res) => {
 		res.send(val[0])
 		res.end()
 	})
+})
+
+app.get('/admin/invoice', (req, res) => {
+	let userkey = req.headers.authorization
+	if(!keyAuth.find(x => x.userkey == userkey)){
+		res.send("Khong the truy cap")
+		res.end()
+		return
+	}
+	sequelize.query(`select i.*, p.product_name from invoice_done i, products p
+					where i.product_id = p.id`, {
+		type: sequelize.QueryTypes.SELECT
+	}).then(val => {
+		res.send(val)
+		res.end()
+	})
+})
+
+app.post('/admin/invoice/deliver', (req, res) => {
+	let userkey = req.headers.authorization
+	if(!keyAuth.find(x => x.userkey == userkey)){
+		res.send("Khong the truy cap")
+		res.end()
+		return
+	}
+	let invoice_done_id = req.body.invoice_done_id
+	console.log(invoice_done_id)
+	sequelize.query("update invoice_done set status = true where invoice_done_id = ?", {
+		type: sequelize.QueryTypes.UPDATE,
+		replacements: [invoice_done_id]
+	}).then(() => {
+		res.send("ok")
+		res.end()
+	})
+})
+
+app.post('/admin/products/change', (req, res) => {
+	let userkey = req.headers.authorization
+	if(!keyAuth.find(x => x.userkey == userkey)){
+		res.send("Khong the truy cap")
+		res.end()
+		return
+	}
+	let { product_id, product_name, category, product_price, timer } = req.body
+	sequelize.query(`update products SET product_name=?, product_price=?, timer=?, current_timer=?, category=?, auction_price=?
+	WHERE id=?`, {
+		type: sequelize.QueryTypes.UPDATE,
+		replacements: [product_name, product_price, timer, timer, category, product_price, product_id]
+	})
+	res.end()
 })

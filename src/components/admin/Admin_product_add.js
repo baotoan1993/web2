@@ -115,15 +115,6 @@ class Admin_product_add extends Component {
 								</div>
 								<Link to="/admin/products" className="list-group-item">Sản phẩm</Link>
 							</div>
-							<br />
-							<div className="list-group">
-								<div className="list-group-item active">
-									<b>TÀI KHOẢN</b>
-								</div>
-								<a href="#" className="list-group-item"
-									onClick={this.handleClickLogout}>Đăng xuất
-								</a>
-							</div>
 						</div>
 					</div>
 

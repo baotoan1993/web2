@@ -1,61 +1,3 @@
-// import React, { Component } from 'react';
-// import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
-
-
-// import Navigation from './components/Navigation';
-// import AdminNavigation from './components/admin/Navigation'
-// import Home from './components/Home';
-// import Login from './components/Login';
-// import Products from './components/Products';
-// import Product_Detail from './components/Product_Detail';
-// import Cart from './components/Cart';
-// import Register from './components/Register';
-// import Admin_products from './components/admin/Admin_products';
-// import Admin_product_add from './components/admin/Admin_product_add';
-// import Admin_product_detail from './components/admin/Admin_product_detail';
-
-// const User_Com = (Com) => {
-// 	return (
-// 		(props) => (
-// 			<React.Fragment>
-// 				<Navigation />
-// 				<Com {...props} />
-// 			</React.Fragment>
-// 		)
-// 	)
-// }
-
-
-// class App extends Component {
-// 	render() {
-// 		return (
-// 			<Router>
-// 				<div>
-// 					<Navigation />
-// 					<Switch>
-// 						<Route exact path='/' component={Home} />
-// 						<Route path='/login' component={Login} />
-// 						<Route path='/register' component={Register} />
-// 						<Route path='/products' component={Products} />
-// 						<Route path='/product-item/:item' component={Product_Detail} />
-// 						<Route path='/cart' component={Cart} />
-// 						<Route exact path='/admin' />
-
-// 						<Route exact path="/admin/products" component={Admin_products} />
-// 						<Route path="/admin/products/add" component={Admin_product_add} />
-// 						<Route path="/admin/product/detail/:id" component={Admin_product_detail} />
-// 					</Switch>
-// 				</div>
-// 			</Router>
-// 		);
-// 	}
-// }
-
-// export default App;
-
-
-
-
 import React, { Component } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
 import { connect } from 'react-redux'
@@ -75,6 +17,8 @@ import Admin_product_add from './components/admin/Admin_product_add';
 import Admin_product_detail from './components/admin/Admin_product_detail';
 
 import './Appp.css'
+import Admin_navigation from './components/admin/Admin_navigation';
+import Admin_invoice from './components/admin/Admin_invoice';
 
 const User_Com = (Com) => {
 	return (
@@ -87,6 +31,16 @@ const User_Com = (Com) => {
 	)
 }
 
+const Admin_com = (Com) => {
+	return (
+		(props) => (
+			<React.Fragment>
+				<Admin_navigation/>
+				<Com {...props} />
+			</React.Fragment>
+		)
+	)
+}
 
 
 class App extends Component {
@@ -113,7 +67,7 @@ class App extends Component {
 
 					}, 1000)
 				} else {
-					alert("Tên đăng nhập hoặc mật khẩu không đúng!")
+					alert(res.data.message)
 				}
 
 			})
@@ -168,10 +122,16 @@ class App extends Component {
 					<div>
 						<Router>
 							<Switch>
-								<Route exact path="/" component={Admin_products} />
+								{/* <Route exact path="/" component={Admin_products} />
 								<Route exact path="/admin/products" component={Admin_products} />
 								<Route path="/admin/products/add" component={Admin_product_add} />
-								<Route path="/admin/product/detail/:id" component={Admin_product_detail} />
+								<Route path="/admin/product/detail/:id" component={Admin_product_detail} /> */}
+
+								<Route exact path="/" render={Admin_com(Admin_products)} />
+								<Route exact path="/admin/products" render={Admin_com(Admin_products)} />
+								<Route path="/admin/products/add" render={Admin_com(Admin_product_add)} />
+								<Route path="/admin/invoice" render={Admin_com(Admin_invoice)} />
+								<Route path="/admin/product/detail/:id" render={Admin_com(Admin_product_detail)} />
 							</Switch>
 
 						</Router>

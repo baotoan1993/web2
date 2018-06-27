@@ -165,15 +165,6 @@ class Admin_products extends Component {
 									onClick={this.handleClickAuctionBegin}>Bắt đầu chạy đấu giá
 								</a>
 							</div>
-							<br />
-							<div className="list-group">
-								<div className="list-group-item active">
-									<b>TÀI KHOẢN</b>
-								</div>
-								<a href="/" className="list-group-item" 
-									onClick={this.handleClickLogout}>Đăng xuất
-								</a>
-							</div>
 						</div>
 					</div>
 					{/*Ket thuc container_menubar*/}
