@@ -18,6 +18,9 @@ class Cart extends Component {
 		axios({
 			url: 'http://localhost:4000/cart',
 			method: 'post',
+			headers: {
+				Authorization: localStorage.getItem('userkey')
+			},
 			data: {
 				user_id: (JSON.parse(localStorage.getItem('user'))).id
 			}
@@ -41,6 +44,9 @@ class Cart extends Component {
 			axios({
 				url: 'http://localhost:4000/cart/remove',
 				method: 'post',
+				headers: {
+					Authorization: localStorage.getItem('userkey')
+				},
 				data: {
 					invoice_id: e.target.getAttribute("invoice_id")
 				}
@@ -48,6 +54,9 @@ class Cart extends Component {
 				axios({
 					url: 'http://localhost:4000/cart',
 					method: 'post',
+					headers: {
+						Authorization: localStorage.getItem('userkey')
+					},
 					data: {
 						user_id: (JSON.parse(localStorage.getItem('user'))).id
 					}
@@ -82,6 +91,9 @@ class Cart extends Component {
 		axios({
 			url: 'http://localhost:4000/cart/paid',
 			method: 'post',
+			headers: {
+				Authorization: localStorage.getItem('userkey')
+			},
 			data: {
 				user_id: user_id,
 				fullname: fullname,

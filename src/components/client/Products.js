@@ -45,6 +45,9 @@ class Products extends Component {
 			axios({
 				url: 'http://localhost:4000/products/category', 
 				method: 'post',
+				headers: {
+					Authorization: localStorage.getItem('userkey')
+				},
 				data:{
 					category: 1
 				}
@@ -65,6 +68,9 @@ class Products extends Component {
 			axios({
 				url: 'http://localhost:4000/products/category', 
 				method: 'post',
+				headers: {
+					Authorization: localStorage.getItem('userkey')
+				},
 				data:{
 					category: 2
 				}
@@ -85,6 +91,9 @@ class Products extends Component {
 			axios({
 				url: 'http://localhost:4000/products/category', 
 				method: 'post',
+				headers: {
+					Authorization: localStorage.getItem('userkey')
+				},
 				data:{
 					category: 3
 				}
@@ -105,6 +114,9 @@ class Products extends Component {
 			axios({
 				url: 'http://localhost:4000/products/category', 
 				method: 'post',
+				headers: {
+					Authorization: localStorage.getItem('userkey')
+				},
 				data:{
 					category: 0
 				}

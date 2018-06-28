@@ -72,7 +72,10 @@ class Admin_products extends Component {
 		e.preventDefault()
 		axios({
 			url: 'http://localhost:4000/admin/products/stop',
-			method: 'post'
+			method: 'post',
+			headers: {
+				Authorization: localStorage.getItem('userkey')
+			}
 		}).then(res => {
 			console.log(res.data)
 				this.setState({
@@ -100,6 +103,9 @@ class Admin_products extends Component {
 			axios({
 				url: 'http://localhost:4000/admin/products/remove',
 				method: 'post',
+				headers: {
+					Authorization: localStorage.getItem('userkey')
+				},
 				data: {
 					product_id: product_id
 				}

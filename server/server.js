@@ -94,10 +94,10 @@ app.get("/start", (req, res) => {
 													type: sequelize.QueryTypes.DELETE,
 													replacements: [x.id]
 												}).then(() => {
-													// sequelize.query(`update products set status = ? where id =?`, {
-													// 	type: sequelize.QueryTypes.UPDATE,
-													// 	replacements: [false, x.id]
-													// })
+													sequelize.query(`update products set status = ? where id =?`, {
+														type: sequelize.QueryTypes.UPDATE,
+														replacements: [false, x.id]
+													})
 													list_products.splice(idx, 1)
 												})
 											})
@@ -202,6 +202,12 @@ app.get('/products/:userkey', (req, res) => {
 })
 
 app.post('/products/category', (req, res) => {
+	let userkey = req.headers.authorization
+	if (!keyAuth.find(x => x.userkey == userkey)) {
+		res.send("Khong the truy cap")
+		res.end()
+		return
+	}
 	let list = []
 	let category = req.body.category
 	if (category == 0) {
@@ -241,6 +247,13 @@ app.get('/product-item/:id/:userkey', (req, res) => {
 
 
 app.post('/auction', (req, res) => {
+	let userkey = req.headers.authorization
+	if (!keyAuth.find(x => x.userkey == userkey)) {
+		res.send("Khong the truy cap")
+		res.end()
+		return
+	}
+
 	let product_id = parseInt(req.body.product_id)
 	let user_id = parseInt(req.body.user_id)
 	let price = parseInt(req.body.price)
@@ -262,6 +275,9 @@ app.post('/auction', (req, res) => {
 					})
 				var idx = list_products.findIndex(x => x.id == product_id)
 				list_products[idx].auction_price = price
+				if(list_products[idx].current_timer < 20){
+					list_products[idx].current_timer = 20
+				}
 				res.end()
 			})
 		} else {
@@ -277,6 +293,9 @@ app.post('/auction', (req, res) => {
 						})
 					var idx = list_products.findIndex(x => x.id == product_id)
 					list_products[idx].auction_price = price
+					if(list_products[idx].current_timer < 20){
+						list_products[idx].current_timer = 20
+					}
 					res.end()
 				})
 		}
@@ -284,6 +303,12 @@ app.post('/auction', (req, res) => {
 })
 
 app.post('/myaution', (req, res) => {
+	let userkey = req.headers.authorization
+	if (!keyAuth.find(x => x.userkey == userkey)) {
+		res.send("Khong the truy cap")
+		res.end()
+		return
+	}
 	let user_id = req.body.user_id
 	sequelize.query(`select au.*, p.product_name from auctioning_temp au, products p 
 					 where user_id=?
@@ -297,6 +322,12 @@ app.post('/myaution', (req, res) => {
 })
 
 app.post('/cart', (req, res) => {
+	let userkey = req.headers.authorization
+	if (!keyAuth.find(x => x.userkey == userkey)) {
+		res.send("Khong the truy cap")
+		res.end()
+		return
+	}
 	let user_id = req.body.user_id
 	sequelize.query(`select iv.*, p.product_name from invoice iv, products p 
 					 where user_id = ? 
@@ -311,6 +342,12 @@ app.post('/cart', (req, res) => {
 })
 
 app.post('/cart/remove', (req, res) => {
+	let userkey = req.headers.authorization
+	if (!keyAuth.find(x => x.userkey == userkey)) {
+		res.send("Khong the truy cap")
+		res.end()
+		return
+	}
 	let invoice_id = req.body.invoice_id
 	sequelize.query("delete from invoice where invoice_id = ?", {
 		type: sequelize.QueryTypes.DELETE,
@@ -321,6 +358,12 @@ app.post('/cart/remove', (req, res) => {
 })
 
 app.post('/cart/paid', (req, res) => {
+	let userkey = req.headers.authorization
+	if (!keyAuth.find(x => x.userkey == userkey)) {
+		res.send("Khong the truy cap")
+		res.end()
+		return
+	}
 	let user_id = req.body.user_id
 	let fullname = req.body.fullname
 	let address = req.body.address
@@ -361,6 +404,12 @@ app.get('/admin/products', (req, res) => {
 })
 
 app.post('/admin/products/stop', (req, res) => {
+	let userkey = req.headers.authorization
+	if (!keyAuth.find(x => x.userkey == userkey)) {
+		res.send("Khong the truy cap")
+		res.end()
+		return
+	}
 	sequelize.query("select * from products where status = false", {
 		type: sequelize.QueryTypes.SELECT
 	}).then((val) => {

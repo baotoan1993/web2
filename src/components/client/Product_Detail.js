@@ -73,12 +73,11 @@ class Product_Detail extends Component {
 				user_id: user_id,
 				product_id: product_id,
 				price: pr
+			},
+			headers: {
+				Authorization: localStorage.getItem('userkey')
 			}
 		})
-			// .then(() => {
-			// 	clearInterval(this.state.isOut)
-			// 	setInterval(this.state.isOut)
-			// })
 	}
 
 	handleClickIncrease = () => {
